@@ -1,6 +1,6 @@
 from enum import Enum
 import random
-
+from faker import Faker
 
 MALE_NAMES_FILEPATH = 'names_surnames_data/men_names.txt'
 MALE_SURNAMES_FILEPATH = 'names_surnames_data/men_surnames.txt'
@@ -37,3 +37,19 @@ def generate_scientific_title(for_student: bool):
     prob = TITLES_STUDENT_PROB if for_student else TITLES_WORKER_PROB
     return random.choices(TITLES, weights=prob, k=1)[0]
 
+
+def generate_student(date_from, date_to):
+    fake = Faker()
+    imie1, imie2, nazwisko = generate_names_and_surname(random.choice([True, False]))
+    title = generate_scientific_title(True)
+    min_age, max_age = 0, 0
+    data_rozpoczecia_studiow = 0
+
+    if title is None:
+        min_age, max_age = 18, 26
+    elif title in ["Licencjat", "Inżynier"]:
+        min_age, max_age = 21, 30
+    elif title in ["Magister", "Magister Inżynier"]:
+        min_age, max_age = 23, 50
+
+    data_urodzenia = fake.date_of_birth(minimum_age=min_age, maximum_age=max_age)
