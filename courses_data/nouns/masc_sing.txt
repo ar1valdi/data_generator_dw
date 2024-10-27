@@ -1,10 +1,10 @@
-Projekt Projektu Projekcie
-Konkurs Konkursu Konkursie
-Internet Internetu Internecie
-Zespół Zespołu Zespole
-Test Testu Teście
-Język Języka Języku
 Biznes Biznesu Biznesie
 Hipertekst Hipertekstu Hipertekście
+Internet Internetu Internecie
+Język Języka Języku
 Kodeks Kodeksu Kodeksie
+Konkurs Konkursu Konkursie
+Projekt Projektu Projekcie
 Przegląd Przeglądu Przeglądzie
+Test Testu Teście
+Zespół Zespołu Zespole

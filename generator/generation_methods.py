@@ -107,23 +107,62 @@ class Lexicon():
             case _:
                 return "_"
 
+    def generate_double_concord(self, case):
+        gender = self.pickGender()
+        match gender:
+            case GrammaticalGender.MASCULINE:
+                return random.choice(self.masc_sing_nouns)[case] + " " + random.choice(self.masc_sing_adjectives)[case] + " i " + random.choice(self.masc_sing_adjectives)[case]
+            case GrammaticalGender.FEMININE:
+                return random.choice(self.fem_sing_nouns)[case] + " " + random.choice(self.fem_sing_adjectives)[case] + " i " + random.choice(self.fem_sing_adjectives)[case]
+            case GrammaticalGender.NEUTER:
+                return random.choice(self.neut_sing_nouns)[case] + " " + random.choice(self.neut_sing_adjectives)[case] + " i " + random.choice(self.neut_sing_adjectives)[case]
+            case GrammaticalGender.MASCULINEPERSONAL:
+                return random.choice(self.masc_plur_nouns)[case] + " " + random.choice(self.masc_plur_adjectives)[case] + " i " + random.choice(self.masc_plur_adjectives)[case]
+            case GrammaticalGender.NONMASCULINEPERSONAL:
+                return random.choice(self.nonmasc_plur_nouns)[case] + " " + random.choice(self.nonmasc_plur_adjectives)[case] + " i " + random.choice(self.nonmasc_plur_adjectives)[case]
+            case _:
+                return "_"
+            
+    def generate_reverse_concord(self, case):
+        words = self.generate_concord(case).split(" ")
+        words.reverse()
+        return ' '.join(words)
+
     def generate_noun_nom(self):
         return self.generate_noun(0)
-    
-    def generate_concord_nom(self):
-        return self.generate_concord(0)
 
     def generate_noun_gen(self):
         return self.generate_noun(1)
 
+    def generate_noun_loc(self):
+        return self.generate_noun(2)
+    
+    def generate_concord_nom(self):
+        return self.generate_concord(0)
+    
     def generate_concord_gen(self):
         return self.generate_concord(1)
 
-    def generate_noun_loc(self):
-        return self.generate_noun(2)
-
     def generate_concord_loc(self):
         return self.generate_concord(2)
+    
+    def generate_reverse_concord_nom(self):
+        return self.generate_reverse_concord(0)
+
+    def generate_reverse_concord_gen(self):
+        return self.generate_reverse_concord(1)
+
+    def generate_reverse_concord_loc(self):
+        return self.generate_reverse_concord(2)
+    
+    def generate_double_concord_nom(self):
+        return self.generate_reverse_concord(0)
+
+    def generate_double_concord_gen(self):
+        return self.generate_reverse_concord(1)
+
+    def generate_double_concord_loc(self):
+        return self.generate_reverse_concord(2)
 
 class CourseLexicon(Lexicon):
     def __init__(self):
@@ -206,6 +245,7 @@ def generate_student(date_from, date_to):
 
 # noun
 # concord = noun + adjective
+# reverse concord = adjective + noun
 
 def generate_course_name(lexicon):
     course_name_recipes = [
@@ -217,7 +257,15 @@ def generate_course_name(lexicon):
         lambda lex : lex.generate_noun_nom() + " w " + lex.generate_noun_loc(),
         lambda lex : lex.generate_concord_nom() + " w " + lex.generate_noun_loc(),
         lambda lex : lex.generate_noun_nom() + " w " + lex.generate_concord_loc(),
-        lambda lex : lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " w " + lex.generate_noun_loc()
+        lambda lex : lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " w " + lex.generate_noun_loc(),
+        lambda lex : lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " i " + lex.generate_noun_gen(),
+        lambda lex : lex.generate_reverse_concord_nom() + " " + lex.generate_noun_gen(),
+        lambda lex : lex.generate_reverse_concord_nom() + " " + lex.generate_concord_gen(),
+        lambda lex : lex.generate_noun_nom() + " " + lex.generate_reverse_concord_gen(),
+        lambda lex : lex.generate_noun_nom() + " w " + lex.generate_reverse_concord_loc(),
+        lambda lex : lex.generate_double_concord_nom(),
+        lambda lex : lex.generate_noun_nom() + " " + lex.generate_double_concord_gen(),
+        lambda lex : lex.generate_noun_nom() + " w " + lex.generate_double_concord_loc()
     ]
     recipe = random.choice(course_name_recipes)
 
@@ -241,7 +289,14 @@ def generate_study_name(lexicon):
         lambda lex : lex.generate_concord_nom(),
         lambda lex : lex.generate_noun_nom(),
         lambda lex : lex.generate_noun_nom() + " i " + lex.generate_noun_nom(),
-        lambda lex : lex.generate_noun_nom() + ", " + lex.generate_noun_nom() + " i " + lex.generate_noun_nom()
+        lambda lex : lex.generate_noun_nom() + ", " + lex.generate_noun_nom() + " i " + lex.generate_noun_nom(),
+        lambda lex : lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
+        lambda lex : lex.generate_reverse_concord_nom(),
+        lambda lex : lex.generate_double_concord_nom(),
+        lambda lex : lex.generate_noun_nom() + ", " + lex.generate_noun_nom() + " i " + lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
+        lambda lex : lex.generate_noun_nom() + " i " + lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
+        lambda lex : lex.generate_noun_nom() + " i " + lex.generate_concord_nom(),
+        lambda lex : lex.generate_noun_nom() + " i " + lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " " + lex.generate_noun_gen()
     ]
     recipe = random.choice(study_name_recipes)
 
