@@ -334,7 +334,7 @@ def generate_course(lexicon, date_from, date_to):
     worker = None
     assigned_study = None
 
-    return Kurs(name, hours, ects, id, creation_date, worker, assigned_study)
+    return sql_models.Kurs(name, hours, ects, id, creation_date, worker, assigned_study)
 
 def generate_study_name(lexicon):
     study_name_recipes = [
@@ -358,4 +358,4 @@ def generate_study(lexicon, year_from, year_to):
     name = generate_study_name(lexicon)
     year = random.randint(year_from, year_to)
     
-    return Kierunek(name, year) 
+    return sql_models.Kierunek(name, year) 
