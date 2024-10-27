@@ -1,22 +1,11 @@
-import csv
-
 from generator.generation_methods import *
-
-
-def write_to_csv(array):
-    filename = f"{next(name for name, value in globals().items() if value is array)}.csv"
-    fieldnames = array[0].__dict__.keys()
-
-    with open(filename, "w", newline='', encoding="utf-8") as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-
-        for obj in array:
-            writer.writerow(obj.__dict__)
+from data_export import *
 
 
 students = []
+students_sql = []
 workers = []
+workers_sql = []
 studies = []
 courses = []
 faculties = []
@@ -25,18 +14,26 @@ s1 = StudyLexicon()
 
 for i in range(10):
     try:
-        students.append(generate_student())
-        workers.append(generate_worker())
+        s = generate_student()
+        students.append(s)
+        students_sql.append(sql_models.StudentSQL.from_StudentCSV(s))
+        w = generate_worker()
+        workers.append(w)
+        workers_sql.append(sql_models.PracownikSQL.from_PracownikCSV(w))
         faculties.append(generate_faculty(c1))
         studies.append(generate_study(s1, 1990, 2000))
         courses.append(generate_course(c1, date(1990, 1, 1), date(2000,1,1)))
     except Exception as e:
-        print("something went wrong, skipping one generation", e)
+        print("something went wrong, skipping one generation: ", e)
 
 
-write_to_csv(students)
-write_to_csv(workers)
-write_to_csv(faculties)
-write_to_csv(courses)
-write_to_csv(studies)
+write_to_csv(students, globals())
+write_to_csv(workers, globals())
+write_to_sql(faculties, "Katedry")
+write_to_sql(courses, "Kursy")
+write_to_sql(studies, "Kierunki")
+write_to_sql(workers_sql, "Pracownicy")
+write_to_sql(students_sql, "Studenci")
+
+
 

@@ -4,13 +4,17 @@ class Katedra:
 
 
 class PracownikSQL:
-    def __init__(self, imie, drugieImie, nazwisko, tytul_naukowy, id, nazwa_katedry):
+    def __init__(self, imie, drugie_imie, nazwisko, tytul_naukowy, id, nazwa_katedry):
         self.imie = imie
-        self.drugieImie = drugieImie
+        self.drugie_imie = drugie_imie
         self.nazwisko = nazwisko
         self.tytul_naukowy = tytul_naukowy
         self.id = id
         self.nazwa_katedry = nazwa_katedry
+
+    @staticmethod
+    def from_PracownikCSV(p):
+        return PracownikSQL(p.imie, p.drugie_imie, p.nazwisko, p.tytul_naukowy, None, None)
 
 
 class Kurs:
@@ -38,6 +42,10 @@ class StudentSQL:
         self.nazwisko = nazwisko
         self.data_urodzenia = data_urodzenia
         self.kierunek_studiow = nazwa_kierunku
+
+    @staticmethod
+    def from_StudentCSV(s):
+        return StudentSQL(None, s.imie, s.drugie_imie, s.nazwisko, s.data_urodzenia, None)
 
 
 class UdzialyWKursach:
