@@ -1,13 +1,16 @@
+import csv
+
 from generator.generation_methods import *
 
-for i in range(10):
-    student = random.choice([True, False])
-    i1, i2, n = generate_names_and_surname(Sex.MALE)
-    title = generate_scientific_title(student)
-    print('student?: ', student, ' - ', i1, i2, n, ' [', title, ']')
+students = []
 
 for i in range(10):
-    student = random.choice([True, False])
-    i1, i2, n = generate_names_and_surname(Sex.FEMALE)
-    title = generate_scientific_title(student)
-    print('student?: ', student, ' - ', i1, i2, n, ' [', title, ']')
+    students.append(generate_student())
+
+with open("students.csv", "w", newline='') as csvfile:
+    fieldnames = students[0].__dict__.keys()
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writeheader()
+
+    for student in students:
+        writer.writerow(student.__dict__)
