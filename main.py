@@ -27,7 +27,7 @@ for i in range(10):
     try:
         students.append(generate_student())
         workers.append(generate_worker())
-        faculties.append(generate_faculty(c1))
+        faculties.append(generate_faculty(s1))
         studies.append(generate_study(s1, 1990, 2000))
         courses.append(generate_course(c1, date(1990, 1, 1), date(2000,1,1)))
     except Exception as e:
