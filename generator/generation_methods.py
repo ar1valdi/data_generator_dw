@@ -1,9 +1,9 @@
 from enum import Enum
 import random
 from faker import Faker
-import datetime
 
-from models.sql_models import *
+from datetime import datetime, timedelta, date
+from models import csv_models, sql_models
 
 MALE_NAMES_FILEPATH = 'names_surnames_data/men_names.txt'
 MALE_SURNAMES_FILEPATH = 'names_surnames_data/men_surnames.txt'
@@ -167,6 +167,21 @@ TITLES = [None, "Licencjat", "Inżynier", "Magister", "Magister Inżynier", "Dok
 TITLES_WORKER_PROB = [0, 1, 5, 1, 15, 50, 19, 9]
 TITLES_STUDENT_PROB = [60, 28, 2, 2, 8, 0, 0, 0]
 
+STUDYING_STUDENTS_PROB = [80, 20]  # true, false
+
+DATE_OF_UNIVERSITY_START = date(1970, 1, 1)
+STUDENT_AGE_RANGES = {
+    "BACHELORS": [18, 26],
+    "MASTERS": [21, 30],
+    "DOCTORS": [23, 50]
+}
+STUDIES_STUDY_TIME = {
+    "BACHELORS": 3.5,
+    "MASTERS": 2,
+    "DOCTORS": 4
+}
+fake = Faker("pl_PL")
+
 
 def generate_names_and_surname(sex: Sex):
     names_path = MALE_NAMES_FILEPATH if sex is Sex.MALE else FEMALE_NAMES_FILEPATH
@@ -177,10 +192,10 @@ def generate_names_and_surname(sex: Sex):
         all_names = names_file.readlines()
         all_surnames = surnames_file.readlines()
 
-    imiona = random.sample(all_names, 2)
-    nazwisko = random.choice(all_surnames)
+    names = random.sample(all_names, 2)
+    surnames = random.choice(all_surnames)
 
-    return imiona[0].strip(), imiona[1].strip(), nazwisko.strip()
+    return names[0].strip(), names[1].strip(), surnames.strip()
 
 
 def generate_scientific_title(for_student: bool):
@@ -188,23 +203,60 @@ def generate_scientific_title(for_student: bool):
     return random.choices(TITLES, weights=prob, k=1)[0]
 
 
-def generate_student(date_from, date_to):
-    fake = Faker()
-    imie1, imie2, nazwisko = generate_names_and_surname(random.choice([True, False]))
-    title = generate_scientific_title(True)
-    min_age, max_age = 0, 0
-    data_rozpoczecia_studiow = 0
-
+def generate_min_max_birth_date_student(title: str):
     if title is None:
-        min_age, max_age = 18, 26
+        age_range = STUDENT_AGE_RANGES["BACHELORS"]
     elif title in ["Licencjat", "Inżynier"]:
-        min_age, max_age = 21, 30
+        age_range = STUDENT_AGE_RANGES["MASTERS"]
     elif title in ["Magister", "Magister Inżynier"]:
-        min_age, max_age = 23, 50
+        age_range = STUDENT_AGE_RANGES["DOCTORS"]
+    else:
+        raise Exception("Wrong title for student")
 
-    data_urodzenia = fake.date_of_birth(minimum_age=min_age, maximum_age=max_age)
+    min_date = DATE_OF_UNIVERSITY_START - timedelta(days=age_range[0] * 365)
+    max_date = datetime.now().date() - timedelta(days=age_range[0] * 365)
+    return min_date, max_date
 
-# noun
+
+def generate_study_start_end_dates(title: str, birthdate: date):
+    if title is None:
+        studies_title_key = "BACHELORS"
+    elif title in ["Licencjat", "Inżynier"]:
+        studies_title_key = "MASTERS"
+    elif title in ["Magister", "Magister Inżynier"]:
+        studies_title_key = "DOCTORS"
+    else:
+        raise Exception("Wrong title for student")
+
+    min_age = STUDENT_AGE_RANGES[studies_title_key][0]
+    start_date = fake.date_between(start_date=birthdate + timedelta(days=min_age * 365))
+
+    if start_date < datetime.now().date() - timedelta(days=int(10 * 365)):
+        is_studying = False
+    else:
+        is_studying = random.choices([True, False], weights=STUDYING_STUDENTS_PROB, k=1)[0]
+
+    if is_studying:
+        return start_date, None
+
+    max_end_date = min(
+        datetime.now().date(),
+        start_date + timedelta(days=int(STUDIES_STUDY_TIME[studies_title_key] * 365))
+    )
+
+    end_date = fake.date_between(start_date=start_date, end_date=max_end_date)
+    return start_date, end_date
+
+
+def generate_student():
+    name1, name2, surname = generate_names_and_surname(random.choice([True, False]))
+    title = generate_scientific_title(True)
+    min_birth, max_birth = generate_min_max_birth_date_student(title)
+    birth = fake.date_between(start_date=min_birth, end_date=max_birth)
+    study_start, study_end = generate_study_start_end_dates(title, birth)
+    return csv_models.StudentCSV(name1, name2, surname, title, birth, study_start, study_end)
+
+  # noun
 # concord = noun + adjective
 
 def generate_course_name(lexicon):
@@ -252,4 +304,3 @@ def generate_study(lexicon, year_from, year_to):
     year = random.randint(year_from, year_to)
     
     return Kierunek(name, year) 
-
