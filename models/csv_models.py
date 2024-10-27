@@ -1,5 +1,6 @@
 class PracownikCSV:
-    def __init__(self, imie, drugie_imie, nazwisko, tytul_naukowy, data_urodzenia, data_zatrudnienia, data_zakonczenia_pracy, numer_umowy):
+    def __init__(self, id, imie, drugie_imie, nazwisko, tytul_naukowy, data_urodzenia, data_zatrudnienia, data_zakonczenia_pracy, numer_umowy):
+        self.id = id
         self.imie = imie
         self.drugie_imie = drugie_imie
         self.nazwisko = nazwisko
@@ -11,7 +12,8 @@ class PracownikCSV:
 
 
 class StudentCSV:
-    def __init__(self, imie, drugie_imie, nazwisko, tytul_naukowy, data_urodzenia, data_rozpoczecia_studiow, data_zakonczenia_studiow):
+    def __init__(self, id, imie, drugie_imie, nazwisko, tytul_naukowy, data_urodzenia, data_rozpoczecia_studiow, data_zakonczenia_studiow):
+        self.id = id
         self.imie = imie
         self.drugie_imie = drugie_imie
         self.nazwisko = nazwisko

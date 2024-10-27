@@ -3,12 +3,13 @@ from copy import deepcopy
 from enum import Enum
 import random
 from faker import Faker
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-from generator.thread_safe_generated_values import get_course_id, is_faculty_name_unique, is_contract_number_unique
+from data_reader import get_active_student
+from generator.thread_safe_generated_values import get_course_id, is_faculty_name_unique, is_contract_number_unique, \
+    get_student_id, drop_out_used
 from models import csv_models, sql_models
 from generator.generation_config import *
-
 
 class Lexicon:
     def __init__(self, filepaths):
@@ -225,23 +226,23 @@ def get_studies_key(title: str):
         raise Exception("Wrong title for student")
 
 
-def generate_min_max_birth_date_student(title: str):
+def generate_min_max_birth_date_student(title: str, date_bounds):
     studies_key = get_studies_key(title)
     min_study_start_age = MIN_STUDY_START_AGE[studies_key]
-    min_date = DATE_OF_UNIVERSITY_START - timedelta(days=min_study_start_age * 365)
-    max_date = datetime.now().date() - timedelta(days=min_study_start_age * 365)
+    min_date = date_bounds["start"] - timedelta(days=min_study_start_age * 365)
+    max_date = date_bounds["end"] - timedelta(days=min_study_start_age * 365)
     return min_date, max_date
 
 
 # generates study start and end dates based on age and studies type
-def generate_study_start_end_dates(title: str, birthdate: date):
+def generate_study_start_end_dates(title: str, birthdate: date, date_bounds):
     fake = Faker("pl_PL")
 
     studies_title_key = get_studies_key(title)
     min_study_start_age = MIN_STUDY_START_AGE[studies_title_key]
     max_study_start_age = MAX_STUDY_START_AGE[studies_title_key]
     max_start_date = min(
-        datetime.now().date(),
+        date_bounds["end"],
         birthdate + timedelta(days=max_study_start_age * 365)
     )
     start_date = fake.date_between(
@@ -249,7 +250,7 @@ def generate_study_start_end_dates(title: str, birthdate: date):
         end_date=max_start_date
     )
 
-    if start_date < datetime.now().date() - timedelta(days=int(10 * 365)):
+    if start_date < date_bounds["end"] - timedelta(days=int(10 * 365)):
         is_studying = False
     else:
         is_studying = random.choices([True, False], weights=STUDYING_STUDENTS_PROB, k=1)[0]
@@ -258,30 +259,33 @@ def generate_study_start_end_dates(title: str, birthdate: date):
         return start_date, None
 
     max_end_date = min(
-        datetime.now().date() - timedelta(days=int(2 * 31)),
+        date_bounds["end"] - timedelta(days=int(2 * 31)),
         start_date + timedelta(days=int(STUDIES_STUDY_TIME[studies_title_key] * 365))
     )
 
-    end_date = fake.date_between(start_date=start_date, end_date=max_end_date)
+    if max_end_date < start_date:
+        end_date = None
+    else:
+        end_date = fake.date_between(start_date=start_date, end_date=max_end_date)
     return start_date, end_date
 
 
-def generate_student():
+def generate_student(date_range):
     fake = Faker("pl_PL")
 
     name1, name2, surname = generate_names_and_surname(random.choice([True, False]))
     title = generate_scientific_title(for_student=True)
-    min_birth, max_birth = generate_min_max_birth_date_student(title)
+    min_birth, max_birth = generate_min_max_birth_date_student(title, date_range)
     birth = fake.date_between(start_date=min_birth, end_date=max_birth)
-    study_start, study_end = generate_study_start_end_dates(title, birth)
-    return csv_models.StudentCSV(name1, name2, surname, title, birth, study_start, study_end)
+    study_start, study_end = generate_study_start_end_dates(title, birth, date_range)
+    return csv_models.StudentCSV(None, name1, name2, surname, title, birth, study_start, study_end)
 
 
-def generate_employment_start_end_dates(birthdate):
+def generate_employment_start_end_dates(birthdate, date_bounds):
     fake = Faker("pl_PL")
 
     still_working = random.choices([True, False], weights=WORKER_STILL_WORKING_PROB, k=1)[0]
-    current_date = datetime.now().date()
+    current_date = date_bounds["end"]
 
     min_start_date = min(
         current_date - timedelta(days=31),
@@ -313,15 +317,15 @@ def generate_contract_number():
             raise Exception("Couldn't create unique contract number 100 times")
 
 
-def generate_worker():
+def generate_worker(dates_range):
     fake = Faker("pl_PL")
 
     name1, name2, surname = generate_names_and_surname(random.choice([True, False]))
     title = generate_scientific_title(for_student=False)
     birth = fake.date_of_birth(minimum_age=MIN_WORKER_AGE, maximum_age=MAX_WORKER_AGE)
-    empl_start, empl_end = generate_employment_start_end_dates(birth)
+    empl_start, empl_end = generate_employment_start_end_dates(birth, dates_range)
     contract_number = generate_contract_number()
-    return csv_models.PracownikCSV(name1, name2, surname, title, birth, empl_start, empl_end, contract_number)
+    return csv_models.PracownikCSV(None, name1, name2, surname, title, birth, empl_start, empl_end, contract_number)
 
 
 def generate_course_name(lexicon):
@@ -408,7 +412,7 @@ def generate_course_base(num, workers):
     return course_base
 
 
-def generate_all_studies_with_courses(lexicon, num, year_from, year_to, workers):
+def generate_all_studies_with_courses(lexicon, num, year_from, year_to, workers, date_bounds):
     study_name_set = generate_name_set(lexicon, num)
     studies = []
     courses = []
@@ -424,7 +428,8 @@ def generate_all_studies_with_courses(lexicon, num, year_from, year_to, workers)
                 course = deepcopy(c)
                 course.id = get_course_id()
                 delta_rok_utworzenia = random.choice([2, 1, 0])
-                rok_utworzenia = min(datetime.now().year, study.rok_rozpoczecia + delta_rok_utworzenia)
+                validated_end_date = date_bounds["end"].year - 1 if date_bounds["end"].month < 10 else date_bounds["end"].year
+                rok_utworzenia = min(validated_end_date, study.rok_rozpoczecia + delta_rok_utworzenia)
                 course.data_utworzenia = date(
                     rok_utworzenia,
                     random.choice([2, 10]),
@@ -442,13 +447,16 @@ def generate_name_set(lexicon, num, must_be_unique=False):
     while len(name_set) < num:
 
         tries = 0
-        while True:
+        if must_be_unique:
+            while True:
+                gen_name = generate_faculty_name(lexicon)
+                tries += 1
+                if is_faculty_name_unique(gen_name):
+                    break
+                if tries > 100:
+                    raise Exception("Couldn't create unique name 100 times")
+        else:
             gen_name = generate_faculty_name(lexicon)
-            tries += 1
-            if is_faculty_name_unique(gen_name):
-                break
-            if tries > 100:
-                raise Exception("Couldn't create unique name 100 times")
 
         name_set.add(gen_name)
 
@@ -466,3 +474,14 @@ def generate_faculty(lexicon):
             raise Exception("Couldn't create unique faculty name 100 times")
 
     return sql_models.Katedra(name)
+
+
+def generate_dropout(last_students_csv, date_bounds):
+    if drop_out_used():
+        return
+    s_csv, s_sql = get_active_student(last_students_csv)
+    if s_csv is None:
+        return None
+    s_csv.data_zakonczenia_studiow = date_bounds["end"] - timedelta(days=31)
+    s_csv.id = get_student_id()
+    return s_csv

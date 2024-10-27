@@ -6,6 +6,7 @@ __student_id = 0
 __faculty_names = set()
 __study_names = set()
 __contract_numbers = set()
+__student_dropped_out = False
 
 __course_id_lock = threading.Lock()
 __worker_id_lock = threading.Lock()
@@ -13,6 +14,7 @@ __student_id_lock = threading.Lock()
 __faculty_check_lock = threading.Lock()
 __study_check_lock = threading.Lock()
 __contract_check_lock = threading.Lock()
+__drop_out_lock = threading.Lock()
 
 
 def is_contract_number_unique(number):
@@ -54,6 +56,14 @@ def get_worker_id():
     with __worker_id_lock:
         __worker_id += 1
         return __worker_id
+
+
+def drop_out_used():
+    global __student_dropped_out
+    with __drop_out_lock:
+        to_ret = __student_dropped_out
+        __student_dropped_out = True
+        return to_ret
 
 
 def get_student_id():

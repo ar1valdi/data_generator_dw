@@ -14,7 +14,7 @@ class PracownikSQL:
 
     @staticmethod
     def from_PracownikCSV(p):
-        return PracownikSQL(p.imie, p.drugie_imie, p.nazwisko, p.tytul_naukowy, None, None)
+        return PracownikSQL(p.imie, p.drugie_imie, p.nazwisko, p.tytul_naukowy, p.id, None)
 
 
 class Kurs:
@@ -47,7 +47,7 @@ class StudentSQL:
 
     @staticmethod
     def from_StudentCSV(s):
-        return StudentSQL(None, s.imie, s.drugie_imie, s.nazwisko, s.data_urodzenia, None, None)
+        return StudentSQL(s.id, s.imie, s.drugie_imie, s.nazwisko, s.data_urodzenia, None, None)
 
 
 class UdzialyWKursach:

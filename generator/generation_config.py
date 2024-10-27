@@ -64,5 +64,14 @@ WORKERS_NUM = 10
 FACULTIES_NUM = 10
 COURSES_PER_STUDY = 3
 STUDIES_NAMES_NUM = 3
-STUDIES_YEARS_RANGE = [2014, 2024]  # [DATE_OF_UNIVERSITY_START.year, datetime.now().year]
 
+# Tx DATES
+T1_DATES = {
+    "start": date(2014, 1, 1),
+    "end": date(2020, 1, 1)
+}
+T2_DATES = {
+    "start": date(2020, 1, 2),
+    "end": date(2024, 1, 1)
+}
+DROPOUT_CHANCE_ON_T_CHANGE = 5
