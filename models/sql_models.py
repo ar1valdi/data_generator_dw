@@ -16,7 +16,7 @@ class PracownikSQL:
 class Kurs:
     def __init__(self, nazwa, ilosc_godzin, ects, id, data_utworzenia, odpowiedzialny_pracownik_id, nazwa_przypisanego_kierunku):
         self.nazwa = nazwa
-        self.ilosc_godin = ilosc_godzin
+        self.ilosc_godzin = ilosc_godzin
         self.liczba_ects = ects
         self.id = id
         self.data_utworzenia = data_utworzenia
