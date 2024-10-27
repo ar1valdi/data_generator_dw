@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from models import csv_models, sql_models
 from generator.generation_config import *
 
+
 class Lexicon():
     def __init__(self, filepaths):
         with (open(filepaths[0], 'r', encoding='utf-8') as masc_sing_nouns_file,
@@ -140,6 +141,7 @@ class Lexicon():
     def generate_double_concord_loc(self):
         return self.generate_reverse_concord(2)
 
+
 class CourseLexicon(Lexicon):
     def __init__(self):
         super().__init__([COURSE_MASC_SING_NOUNS_FILEPATH,
@@ -152,6 +154,7 @@ class CourseLexicon(Lexicon):
                           COURSE_NEUT_SING_ADJECTIVES_FILEPATH,
                           COURSE_MASC_PLUR_ADJECTIVES_FILEPATH,
                           COURSE_NONMASC_PLUR_ADJECTIVES_FILEPATH])
+
 
 class StudyLexicon(Lexicon):
     def __init__(self):
@@ -166,12 +169,14 @@ class StudyLexicon(Lexicon):
                           STUDY_MASC_PLUR_ADJECTIVES_FILEPATH,
                           STUDY_NONMASC_PLUR_ADJECTIVES_FILEPATH])
 
+
 class GrammaticalGender(Enum):
     MASCULINE = 1
     FEMININE = 2
     NEUTER = 3
     MASCULINEPERSONAL = 4
     NONMASCULINEPERSONAL = 5
+
 
 class Sex(Enum):
     MALE = 1
@@ -325,8 +330,6 @@ def generate_course_name(lexicon):
 
 
 def generate_course(lexicon, date_from, date_to):
-    fake = Faker()
-
     name = generate_course_name(lexicon)
     hours = random.randrange(10,121,5)
     ects = random.randint(1,8)

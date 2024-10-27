@@ -1,4 +1,5 @@
 import csv
+from datetime import date
 
 
 def write_to_csv(array, globals):
@@ -23,12 +24,22 @@ def write_to_sql(array, table_name):
         last_element = array[-1]
 
         for obj in array:
-            values = [repr(getattr(obj, field)) for field in fieldnames]  # Use repr to handle string quoting
+            values = []
+            for field in fieldnames:
+                value = getattr(obj, field)
+                if isinstance(value, date):
+                    value = value.strftime('%Y-%m-%d')
+                elif value is None:
+                    value = 'NULL'
+                else:
+                    value = repr(value)
+                values.append(value)
+
             query = f"({', '.join(values)})"
             if obj != last_element:
                 query += ",\n"
             else:
                 query += ";"
 
-            sqlfile.write(query)
+        sqlfile.write(query)
 
