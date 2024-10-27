@@ -5,6 +5,30 @@ MALE_SURNAMES_FILEPATH = 'names_surnames_data/men_surnames.txt'
 FEMALE_NAMES_FILEPATH = 'names_surnames_data/women_names.txt'
 FEMALE_SURNAMES_FILEPATH = 'names_surnames_data/women_surnames.txt'
 
+COURSE_MASC_SING_NOUNS_FILEPATH = 'courses_data/nouns/masc_sing.txt'
+COURSE_FEM_SING_NOUNS_FILEPATH = 'courses_data/nouns/fem_sing.txt'
+COURSE_NEUT_SING_NOUNS_FILEPATH = 'courses_data/nouns/neut_sing.txt'
+COURSE_MASC_PLUR_NOUNS_FILEPATH = 'courses_data/nouns/masc_plur.txt'
+COURSE_NONMASC_PLUR_NOUNS_FILEPATH = 'courses_data/nouns/nonmasc_plur.txt'
+
+COURSE_MASC_SING_ADJECTIVES_FILEPATH = 'courses_data/adjectives/masc_sing.txt'
+COURSE_FEM_SING_ADJECTIVES_FILEPATH = 'courses_data/adjectives/fem_sing.txt'
+COURSE_NEUT_SING_ADJECTIVES_FILEPATH = 'courses_data/adjectives/neut_sing.txt'
+COURSE_MASC_PLUR_ADJECTIVES_FILEPATH = 'courses_data/adjectives/masc_plur.txt'
+COURSE_NONMASC_PLUR_ADJECTIVES_FILEPATH = 'courses_data/adjectives/nonmasc_plur.txt'
+
+STUDY_MASC_SING_NOUNS_FILEPATH = 'studies_data/nouns/masc_sing.txt'
+STUDY_FEM_SING_NOUNS_FILEPATH = 'studies_data/nouns/fem_sing.txt'
+STUDY_NEUT_SING_NOUNS_FILEPATH = 'studies_data/nouns/neut_sing.txt'
+STUDY_MASC_PLUR_NOUNS_FILEPATH = 'studies_data/nouns/masc_plur.txt'
+STUDY_NONMASC_PLUR_NOUNS_FILEPATH = 'studies_data/nouns/nonmasc_plur.txt'
+
+STUDY_MASC_SING_ADJECTIVES_FILEPATH = 'studies_data/adjectives/masc_sing.txt'
+STUDY_FEM_SING_ADJECTIVES_FILEPATH = 'studies_data/adjectives/fem_sing.txt'
+STUDY_NEUT_SING_ADJECTIVES_FILEPATH = 'studies_data/adjectives/neut_sing.txt'
+STUDY_MASC_PLUR_ADJECTIVES_FILEPATH = 'studies_data/adjectives/masc_plur.txt'
+STUDY_NONMASC_PLUR_ADJECTIVES_FILEPATH = 'studies_data/adjectives/nonmasc_plur.txt'
+
 TITLES = [None, "Licencjat", "Inżynier", "Magister", "Magister Inżynier", "Doktor", "Doktor Habilitowany", "Profesor"]
 TITLES_WORKER_PROB = [0, 1, 5, 1, 15, 50, 19, 9]
 TITLES_STUDENT_PROB = [60, 28, 2, 2, 8, 0, 0, 0]
