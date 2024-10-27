@@ -30,6 +30,7 @@ STUDY_NEUT_SING_ADJECTIVES_FILEPATH = 'studies_data/adjectives/neut_sing.txt'
 STUDY_MASC_PLUR_ADJECTIVES_FILEPATH = 'studies_data/adjectives/masc_plur.txt'
 STUDY_NONMASC_PLUR_ADJECTIVES_FILEPATH = 'studies_data/adjectives/nonmasc_plur.txt'
 
+
 class Lexicon():
     def __init__(self, filepaths):
         with (open(filepaths[0], 'r', encoding='utf-8') as masc_sing_nouns_file,
@@ -245,9 +246,13 @@ def generate_study_start_end_dates(title: str, birthdate: date):
     studies_title_key = get_studies_key(title)
     min_study_start_age = MIN_STUDY_START_AGE[studies_title_key]
     max_study_start_age = MAX_STUDY_START_AGE[studies_title_key]
+    max_start_date = min(
+        datetime.now().date(),
+        birthdate + timedelta(days=max_study_start_age * 365)
+    )
     start_date = fake.date_between(
         start_date=birthdate + timedelta(days=min_study_start_age * 365),
-        end_date=birthdate + timedelta(days=max_study_start_age * 365)
+        end_date=max_start_date
     )
 
     if start_date < datetime.now().date() - timedelta(days=int(10 * 365)):
@@ -275,33 +280,75 @@ def generate_student():
     study_start, study_end = generate_study_start_end_dates(title, birth)
     return csv_models.StudentCSV(name1, name2, surname, title, birth, study_start, study_end)
 
+
+def generate_employment_start_end_dates(birthdate):
+    still_working = random.choices([True, False], weights=WORKER_STILL_WORKING_PROB, k=1)[0]
+    current_date = datetime.now().date()
+
+    min_start_date = min(
+        current_date - timedelta(days=31),
+        birthdate + timedelta(days=MIN_WORKER_AGE * 365)
+    )
+    max_start_date = current_date - timedelta(days=31)
+    start_date = fake.date_between(start_date=min_start_date, end_date=max_start_date)
+
+    if still_working: return start_date, None
+
+    min_end_date = start_date + timedelta(days=1)
+    max_end_date = current_date
+    end_date = fake.date_between(start_date=min_end_date, end_date=max_end_date)
+
+    return start_date, end_date
+
+
+used_contract_numbers = []
+def generate_contract_number():
+    while True:
+        letters = ''.join(random.choices(string.ascii_uppercase, k=3))
+        digits = ''.join(random.choices(string.digits, k=10))
+        number = f"{letters}_{digits}"
+        if number not in used_contract_numbers:
+            used_contract_numbers.append(number)
+            return number
+
+
+def generate_worker():
+    name1, name2, surname = generate_names_and_surname(random.choice([True, False]))
+    title = generate_scientific_title(for_student=True)
+    birth = fake.date_of_birth(minimum_age=MIN_WORKER_AGE, maximum_age=MAX_WORKER_AGE)
+    empl_start, empl_end = generate_employment_start_end_dates(birth)
+    contract_number = generate_contract_number()
+    return csv_models.PracownikCSV(name1, name2, surname, title, birth, empl_start, empl_end, contract_number)
+
+
   # noun
 # concord = noun + adjective
 # reverse concord = adjective + noun
 
 def generate_course_name(lexicon):
     course_name_recipes = [
-        lambda lex : lex.generate_concord_nom(),
-        lambda lex : lex.generate_noun_nom() + " " + lex.generate_concord_gen(),
-        lambda lex : lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " " + lex.generate_noun_gen(),
-        lambda lex : lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
-        lambda lex : lex.generate_noun_nom() + " i " + lex.generate_noun_nom(),
-        lambda lex : lex.generate_noun_nom() + " w " + lex.generate_noun_loc(),
-        lambda lex : lex.generate_concord_nom() + " w " + lex.generate_noun_loc(),
-        lambda lex : lex.generate_noun_nom() + " w " + lex.generate_concord_loc(),
-        lambda lex : lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " w " + lex.generate_noun_loc(),
-        lambda lex : lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " i " + lex.generate_noun_gen(),
-        lambda lex : lex.generate_reverse_concord_nom() + " " + lex.generate_noun_gen(),
-        lambda lex : lex.generate_reverse_concord_nom() + " " + lex.generate_concord_gen(),
-        lambda lex : lex.generate_noun_nom() + " " + lex.generate_reverse_concord_gen(),
-        lambda lex : lex.generate_noun_nom() + " w " + lex.generate_reverse_concord_loc(),
-        lambda lex : lex.generate_double_concord_nom(),
-        lambda lex : lex.generate_noun_nom() + " " + lex.generate_double_concord_gen(),
-        lambda lex : lex.generate_noun_nom() + " w " + lex.generate_double_concord_loc()
+        lambda lex: lex.generate_concord_nom(),
+        lambda lex: lex.generate_noun_nom() + " " + lex.generate_concord_gen(),
+        lambda lex: lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " " + lex.generate_noun_gen(),
+        lambda lex: lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
+        lambda lex: lex.generate_noun_nom() + " i " + lex.generate_noun_nom(),
+        lambda lex: lex.generate_noun_nom() + " w " + lex.generate_noun_loc(),
+        lambda lex: lex.generate_concord_nom() + " w " + lex.generate_noun_loc(),
+        lambda lex: lex.generate_noun_nom() + " w " + lex.generate_concord_loc(),
+        lambda lex: lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " w " + lex.generate_noun_loc(),
+        lambda lex: lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " i " + lex.generate_noun_gen(),
+        lambda lex: lex.generate_reverse_concord_nom() + " " + lex.generate_noun_gen(),
+        lambda lex: lex.generate_reverse_concord_nom() + " " + lex.generate_concord_gen(),
+        lambda lex: lex.generate_noun_nom() + " " + lex.generate_reverse_concord_gen(),
+        lambda lex: lex.generate_noun_nom() + " w " + lex.generate_reverse_concord_loc(),
+        lambda lex: lex.generate_double_concord_nom(),
+        lambda lex: lex.generate_noun_nom() + " " + lex.generate_double_concord_gen(),
+        lambda lex: lex.generate_noun_nom() + " w " + lex.generate_double_concord_loc()
     ]
     recipe = random.choice(course_name_recipes)
 
     return recipe(lexicon)
+
 
 def generate_course(lexicon, date_from, date_to):
     fake = Faker()
@@ -316,26 +363,33 @@ def generate_course(lexicon, date_from, date_to):
 
     return sql_models.Kurs(name, hours, ects, id, creation_date, worker, assigned_study)
 
+
 def generate_study_name(lexicon):
     study_name_recipes = [
-        lambda lex : lex.generate_concord_nom(),
-        lambda lex : lex.generate_noun_nom(),
-        lambda lex : lex.generate_noun_nom() + " i " + lex.generate_noun_nom(),
-        lambda lex : lex.generate_noun_nom() + ", " + lex.generate_noun_nom() + " i " + lex.generate_noun_nom(),
-        lambda lex : lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
-        lambda lex : lex.generate_reverse_concord_nom(),
-        lambda lex : lex.generate_double_concord_nom(),
-        lambda lex : lex.generate_noun_nom() + ", " + lex.generate_noun_nom() + " i " + lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
-        lambda lex : lex.generate_noun_nom() + " i " + lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
-        lambda lex : lex.generate_noun_nom() + " i " + lex.generate_concord_nom(),
-        lambda lex : lex.generate_noun_nom() + " i " + lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " " + lex.generate_noun_gen()
+        lambda lex: lex.generate_concord_nom(),
+        lambda lex: lex.generate_noun_nom(),
+        lambda lex: lex.generate_noun_nom() + " i " + lex.generate_noun_nom(),
+        lambda lex: lex.generate_noun_nom() + ", " + lex.generate_noun_nom() + " i " + lex.generate_noun_nom(),
+        lambda lex: lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
+        lambda lex: lex.generate_reverse_concord_nom(),
+        lambda lex: lex.generate_double_concord_nom(),
+        lambda lex: lex.generate_noun_nom() + ", " + lex.generate_noun_nom() + " i " + lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
+        lambda lex: lex.generate_noun_nom() + " i " + lex.generate_noun_nom() + " " + lex.generate_noun_gen(),
+        lambda lex: lex.generate_noun_nom() + " i " + lex.generate_concord_nom(),
+        lambda lex: lex.generate_noun_nom() + " i " + lex.generate_noun_nom() + " " + lex.generate_noun_gen() + " " + lex.generate_noun_gen()
     ]
     recipe = random.choice(study_name_recipes)
 
     return recipe(lexicon)
+
 
 def generate_study(lexicon, year_from, year_to):
     name = generate_study_name(lexicon)
     year = random.randint(year_from, year_to)
 
     return sql_models.Kierunek(name, year)
+
+
+def generate_faculty(lexicon):
+    name = generate_study_name(lexicon)
+    return sql_models.Katedra(name)

@@ -17,15 +17,26 @@ def write_to_csv(array):
 
 students = []
 workers = []
+studies = []
+courses = []
+faculties = []
+c1 = CourseLexicon()
+s1 = StudyLexicon()
 
 for i in range(10):
     try:
         students.append(generate_student())
         workers.append(generate_worker())
-    except Exception:
-        print("something went wrong, skipping one generation")
+        faculties.append(generate_faculty(c1))
+        studies.append(generate_study(s1, 1990, 2000))
+        courses.append(generate_course(c1, date(1990, 1, 1), date(2000,1,1)))
+    except Exception as e:
+        print("something went wrong, skipping one generation", e)
 
 
 write_to_csv(students)
 write_to_csv(workers)
+write_to_csv(faculties)
+write_to_csv(courses)
+write_to_csv(studies)
 
