@@ -1,6 +1,6 @@
 import os
 import threading
-from batch_generator import generate_batch
+from generator.batch_generator import generate_batch
 
 
 # create results directory if it doesn't exist
