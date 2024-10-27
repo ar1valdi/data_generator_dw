@@ -18,14 +18,15 @@ class PracownikSQL:
 
 
 class Kurs:
-    def __init__(self, nazwa, ilosc_godzin, ects, id, data_utworzenia, odpowiedzialny_pracownik_id, nazwa_przypisanego_kierunku):
+    def __init__(self, nazwa, ilosc_godzin, ects, id, data_utworzenia, odpowiedzialny_pracownik_id, nazwa_przypisanego_kierunku, rok_rozpoczecia_kierunku):
         self.nazwa = nazwa
         self.ilosc_godzin = ilosc_godzin
         self.liczba_ects = ects
         self.id = id
         self.data_utworzenia = data_utworzenia
-        self.odpowiedzialny_pracownik = odpowiedzialny_pracownik_id
-        self.przypisany_kierunek = nazwa_przypisanego_kierunku
+        self.id_prowadzacego = odpowiedzialny_pracownik_id
+        self.nazwa_kierunku = nazwa_przypisanego_kierunku
+        self.rok_rozpoczecia_kierunku = rok_rozpoczecia_kierunku
 
 
 class Kierunek:
@@ -35,17 +36,18 @@ class Kierunek:
 
 
 class StudentSQL:
-    def __init__(self, id, imie, drugie_imie, nazwisko, data_urodzenia, nazwa_kierunku):
+    def __init__(self, id, imie, drugie_imie, nazwisko, data_urodzenia, nazwa_kierunku, rok_rozpoczecia_kierunku_studiow):
         self.id = id
         self.imie = imie
         self.drugie_imie = drugie_imie
         self.nazwisko = nazwisko
         self.data_urodzenia = data_urodzenia
-        self.kierunek_studiow = nazwa_kierunku
+        self.nazwa_kierunku_studiow = nazwa_kierunku
+        self.rok_rozpoczecia_kierunku_studiow = rok_rozpoczecia_kierunku_studiow
 
     @staticmethod
     def from_StudentCSV(s):
-        return StudentSQL(None, s.imie, s.drugie_imie, s.nazwisko, s.data_urodzenia, None)
+        return StudentSQL(None, s.imie, s.drugie_imie, s.nazwisko, s.data_urodzenia, None, None)
 
 
 class UdzialyWKursach:
