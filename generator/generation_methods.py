@@ -293,7 +293,7 @@ def generate_contract_number():
 
 def generate_worker():
     name1, name2, surname = generate_names_and_surname(random.choice([True, False]))
-    title = generate_scientific_title(for_student=True)
+    title = generate_scientific_title(for_student=False)
     birth = fake.date_of_birth(minimum_age=MIN_WORKER_AGE, maximum_age=MAX_WORKER_AGE)
     empl_start, empl_end = generate_employment_start_end_dates(birth)
     contract_number = generate_contract_number()
