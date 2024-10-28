@@ -488,7 +488,7 @@ def generate_dropout(last_students_csv, date_bounds):
     if active_s is None:
         return None
     active_s.data_zakonczenia_studiow = date_bounds["end"] - timedelta(days=31)
-    active_s.id = get_student_id()
+    #active_s.id = get_student_id()
     return active_s
 
 
