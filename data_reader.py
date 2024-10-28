@@ -32,7 +32,7 @@ def prepare_query_line(fieldnames, obj, end):
     for field in fieldnames:
         value = getattr(obj, field)
         if isinstance(value, date):
-            value = value.strftime('%Y-%m-%d')
+            value = f"'{value.strftime('%Y-%m-%d')}'"
         elif value is None:
             value = 'NULL'
         else:

@@ -24,11 +24,11 @@ CREATE TABLE Kursy (
     ilosc_godzin SMALLINT NOT NULL,
     liczba_ects SMALLINT NOT NULL,
     data_utworzenia DATE NOT NULL,
-    odpowiedzialny_pracownik_id BIGINT NOT NULL,
-    nazwa_przypisanego_kierunku VARCHAR(150) NOT NULL,
+    id_prowadzacego BIGINT NOT NULL,
+    nazwa_kierunku VARCHAR(150) NOT NULL,
     rok_rozpoczecia_kierunku SMALLINT NOT NULL,
-    FOREIGN KEY (odpowiedzialny_pracownik_id) REFERENCES Pracownicy(id),
-    FOREIGN KEY (nazwa_przypisanego_kierunku, rok_rozpoczecia_kierunku) REFERENCES Kierunki(nazwa, rok_rozpoczecia)
+    FOREIGN KEY (id_prowadzacego) REFERENCES Pracownicy(id),
+    FOREIGN KEY (nazwa_kierunku, rok_rozpoczecia_kierunku) REFERENCES Kierunki(nazwa, rok_rozpoczecia)
 );
 
 CREATE TABLE Studenci (
