@@ -50,11 +50,13 @@ def write_to_sql(array, table_name, prefix):
     with sql_lock:
         if not os.path.isfile(filename):
             query = f"INSERT INTO {table_name} ({','.join(fieldnames)}) VALUES\n"
+        else:
+            query = f",\n"
 
         with open(filename, "a", encoding="utf-8") as sqlfile:
             for obj in array[:-1]:
                 query += prepare_query_line(fieldnames, obj, ",\n")
-            query += prepare_query_line(fieldnames, array[-1], ";\n")
+            query += prepare_query_line(fieldnames, array[-1], "")
 
             sqlfile.write(query)
 
