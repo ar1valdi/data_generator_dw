@@ -83,6 +83,6 @@ def generate_batch(date_range, file_prefix, prev_prefix):
         s = generate_dropout(f"{prev_prefix}_Studenci", date_range)
         if s is None:
             return
-        print(s.id)
+        #print(s.id)
         write_to_csv([s], "Studenci", file_prefix)
 
