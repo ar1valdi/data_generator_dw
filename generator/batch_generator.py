@@ -30,7 +30,6 @@ def generate_batch(date_range, file_prefix, prev_prefix):
 
     # COURSES, STUDIES
     studies, courses = generate_all_studies_with_courses(
-        c1,
         STUDIES_NAMES_NUM,
         date_range["start"].year,
         date_range["end"].year,

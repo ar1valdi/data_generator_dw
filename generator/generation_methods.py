@@ -412,8 +412,8 @@ def generate_course_base(num, workers):
     return course_base
 
 
-def generate_all_studies_with_courses(lexicon, num, year_from, year_to, workers, date_bounds):
-    study_name_set = generate_name_set(lexicon, num, generate_study_name)
+def generate_all_studies_with_courses(num, year_from, year_to, workers, date_bounds):
+    study_name_set = generate_name_set(StudyLexicon(), num, generate_study_name)
     studies = []
     courses = []
 
