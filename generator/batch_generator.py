@@ -10,12 +10,10 @@ def generate_batch(date_range, file_prefix, prev_prefix):
     workers_sql = []
     faculties = []
     participations = []
-    c1 = CourseLexicon()
-    s1 = StudyLexicon()
 
     # FACULTIES
     for i in range(FACULTIES_NUM):
-        faculties.append(generate_faculty(s1))
+        faculties.append(generate_faculty(StudyLexicon()))
     write_to_sql(faculties, "Katedry", file_prefix)
 
     # WORKERS
@@ -54,31 +52,18 @@ def generate_batch(date_range, file_prefix, prev_prefix):
     write_to_csv(students, "Studenci", file_prefix)
 
     # PARTICIPATIONS IN COURSES
-    for course in courses:
-        for student in students_sql:
-            if course.nazwa_kierunku == student.nazwa_kierunku_studiow and course.rok_rozpoczecia_kierunku == student.rok_rozpoczecia_kierunku_studiow:
-                participations.append(generate_participation(course, student))
-                continue
+    if not prev_prefix:
+        participations = generate_all_participations(courses, students_sql, students)
+        write_to_sql(participations, "UdzialyWKursach", file_prefix)
 
-            if course.rok_rozpoczecia_kierunku == student.rok_rozpoczecia_kierunku_studiow and random.random() <= VOLUNTARY_JOIN_COURSE_PROB:
-                student_in_csv = [s for s in students if student.id == s.id]
+    else:
+        courses = get_all_saved_courses(f"{prev_prefix}_Kursy")
+        students, students_sql = get_all_saved_students(f"{prev_prefix}_Studenci")
 
-                if len(student_in_csv) == 0:
-                    continue
+        participations = generate_all_participations(courses, students_sql, students)
+        write_to_sql(participations, "UdzialyWKursach", file_prefix)
 
-                if student_in_csv[0].data_rozpoczecia_studiow < course.data_utworzenia:
-                    if student_in_csv[0].data_zakonczenia_studiow == None or student_in_csv[0].data_zakonczenia_studiow > course.data_utworzenia:
-                        participations.append(generate_participation(course, student))
-
-
-            
-            
-
-    # MOŻE JAKIEŚ UPDATY (np. zmiana stopnia naukowego, zmiana nazwiska (małżeństwo))
-
-    write_to_sql(participations, "UdzialyWKursach", file_prefix)
-
-    if prev_prefix:
+        # DROPOUT
         s = generate_dropout(f"{prev_prefix}_Studenci", date_range)
         if s is None:
             return

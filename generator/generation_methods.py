@@ -5,7 +5,7 @@ import random
 from faker import Faker
 from datetime import timedelta
 
-from data_reader import get_active_student
+from data_reader import get_all_saved_students
 from generator.thread_safe_generated_values import get_course_id, is_faculty_name_unique, is_contract_number_unique, \
     get_student_id, drop_out_used
 from models import csv_models, sql_models
@@ -479,12 +479,18 @@ def generate_faculty(lexicon):
 def generate_dropout(last_students_csv, date_bounds):
     if drop_out_used():
         return
-    s_csv, s_sql = get_active_student(last_students_csv)
-    if s_csv is None:
+    s_csv, s_sql = get_all_saved_students(last_students_csv)
+    active_s = None
+    for s in s_csv:
+        if s.data_zakonczenia_studiow == None:
+            active_s = s
+            break
+    if active_s is None:
         return None
-    s_csv.data_zakonczenia_studiow = date_bounds["end"] - timedelta(days=31)
-    s_csv.id = get_student_id()
-    return s_csv
+    active_s.data_zakonczenia_studiow = date_bounds["end"] - timedelta(days=31)
+    active_s.id = get_student_id()
+    return active_s
+
 
 def generate_participation(course, student):
     fake = Faker("pl_PL")
@@ -494,3 +500,24 @@ def generate_participation(course, student):
     end_date = fake.date_between_dates(start_date + timedelta(7), start_date + timedelta(180))
 
     return sql_models.UdzialyWKursach(course.id, student.id, grade, start_date, end_date)
+
+
+def generate_all_participations(courses, students_sql, students):
+    participations = []
+    for course in courses:
+        for student in students_sql:
+            if course.nazwa_kierunku == student.nazwa_kierunku_studiow and course.rok_rozpoczecia_kierunku == student.rok_rozpoczecia_kierunku_studiow:
+                participations.append(generate_participation(course, student))
+                continue
+
+            if course.rok_rozpoczecia_kierunku == student.rok_rozpoczecia_kierunku_studiow and random.random() <= VOLUNTARY_JOIN_COURSE_PROB:
+                student_in_csv = [s for s in students if student.id == s.id]
+
+                if len(student_in_csv) == 0:
+                    continue
+
+                if student_in_csv[0].data_rozpoczecia_studiow < course.data_utworzenia:
+                    if student_in_csv[0].data_zakonczenia_studiow is None or student_in_csv[0].data_zakonczenia_studiow > course.data_utworzenia:
+                        participations.append(generate_participation(course, student))
+
+    return participations

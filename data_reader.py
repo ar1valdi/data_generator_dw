@@ -9,6 +9,7 @@ import models.sql_models
 csv_lock = threading.Lock()
 sql_lock = threading.Lock()
 prev_student_lock = threading.Lock()
+prev_course_lock = threading.Lock()
 
 
 def write_to_csv(array, filename, prefix):
@@ -70,9 +71,9 @@ def __parse_date(date_string):
     return None
 
 
-def get_active_student(filename):
+def get_all_saved_students(filename):
     with prev_student_lock:
-        student_csv = None
+        students_csv = []
         with open(f"results/{filename}.csv", newline='', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
@@ -86,24 +87,43 @@ def get_active_student(filename):
                     data_rozpoczecia_studiow=__parse_date(row["data_rozpoczecia_studiow"]),
                     data_zakonczenia_studiow=__parse_date(row["data_zakonczenia_studiow"])
                 )
-                if student_csv.data_zakonczenia_studiow is None:
-                    break
+                students_csv.append(student_csv)
 
-        if student_csv is None:
-            return None
-
-        student_sql = None
-
+        students_sql = []
         with open(f"results/{filename}_inserts.sql", newline='', encoding='utf-8') as sqlfile:
-            reader = sqlfile.readlines()
+            reader = sqlfile.readlines()[1:]
             for row in reader:
-                if row.startswith(f"({student_csv.id}"):
-                    fields = row.split(" , ")
-                    study_name = fields[5]
-                    study_year = fields[6].strip()[:-2]
-                    student_sql = models.sql_models.StudentSQL.from_StudentCSV(student_csv)
-                    student_sql.nazwa_kierunku_studiow = study_name
-                    student_sql.rok_rozpoczecia_kierunku_studiow = int(study_year)
-                    break
+                fields = row.split(" , ")
+                study_name = fields[5]
+                study_year = fields[6].strip()[:-2]
+                student_sql = models.sql_models.StudentSQL.from_StudentCSV(student_csv)
+                student_sql.nazwa_kierunku_studiow = study_name
+                student_sql.rok_rozpoczecia_kierunku_studiow = int(study_year)
+                students_sql.append(student_sql)
 
-        return student_csv, student_sql
+        return students_csv, students_sql
+
+
+def get_all_saved_courses(filename):
+    with prev_course_lock:
+        courses = []
+        with open(f"results/{filename}_inserts.sql", newline='', encoding='utf-8') as sqlfile:
+            reader = sqlfile.readlines()[1:]
+            for row in reader:
+                fields = row[1:-2].split(" , ")
+                nazwa = fields[0]
+                godziny = int(fields[1])
+                ects = int(fields[2])
+                id = int(fields[3])
+                data_utworzenia = __parse_date(fields[4][1:-1])
+                id_prow = int(fields[5])
+                nazwa_kier = fields[6]
+                rok_kier = int(fields[7][:-2])
+                course = models.sql_models.Kurs(
+                    nazwa, godziny, ects, id, data_utworzenia, id_prow, nazwa_kier, rok_kier
+                )
+                courses.append(course)
+
+        return courses
+
+
