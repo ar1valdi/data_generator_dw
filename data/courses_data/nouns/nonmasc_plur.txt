@@ -1,6 +1,6 @@
 Algorytmy Algorytmów Algorytmach
-Aplikacje Aplikacji Aplikacji
-Aspekty Aspektu Aspekcie
+Aplikacje Aplikacji Aplikacjach
+Aspekty Aspektów Aspektach
 Bazy Baz Bazach
 Hipermedia Hipermediów Hipermediach
 Hurtownie Hurtowni Hurtowniach

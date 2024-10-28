@@ -485,3 +485,12 @@ def generate_dropout(last_students_csv, date_bounds):
     s_csv.data_zakonczenia_studiow = date_bounds["end"] - timedelta(days=31)
     s_csv.id = get_student_id()
     return s_csv
+
+def generate_participation(course, student):
+    fake = Faker("pl_PL")
+
+    grade = random.choices([2,3,3.5,4,4.5,5], weights = [1,15,20,25,20,10])
+    start_date = fake.date_between_dates(course.data_utworzenia, course.data_utworzenia + timedelta(30))
+    end_date = fake.date_between_dates(start_date + timedelta(7), start_date + timedelta(180))
+
+    return sql_models.UdzialyWKursach(course.id, student.id, grade, start_date, end_date)
