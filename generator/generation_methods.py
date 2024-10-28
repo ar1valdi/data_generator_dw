@@ -442,7 +442,7 @@ def generate_all_studies_with_courses(num, year_from, year_to, workers, date_bou
     return studies, courses
 
 
-def generate_name_set(lexicon, num, generation_method, must_be_unique=False):
+def generate_name_set(lexicon, num, generation_method, must_be_unique=True):
     name_set = set()
     while len(name_set) < num:
 
@@ -482,20 +482,20 @@ def generate_dropout(last_students_csv, date_bounds):
     s_csv, s_sql = get_all_saved_students(last_students_csv)
     active_s = None
     for s in s_csv:
-        if s.data_zakonczenia_studiow == None:
+        if s.data_zakonczenia_studiow is None:
             active_s = s
             break
     if active_s is None:
         return None
     active_s.data_zakonczenia_studiow = date_bounds["end"] - timedelta(days=31)
-    #active_s.id = get_student_id()
+    active_s.id = get_student_id()
     return active_s
 
 
 def generate_participation(course, student):
     fake = Faker("pl_PL")
 
-    grade = random.choices([2,3,3.5,4,4.5,5], weights = [1,15,20,25,20,10])
+    grade = random.choices([2,3,3.5,4,4.5,5], weights = [1,15,20,25,20,10])[0]
     start_date = fake.date_between_dates(course.data_utworzenia, course.data_utworzenia + timedelta(30))
     end_date = fake.date_between_dates(start_date + timedelta(7), start_date + timedelta(180))
 
@@ -510,7 +510,8 @@ def generate_all_participations(courses, students_sql, students):
                 participations.append(generate_participation(course, student))
                 continue
 
-            if course.rok_rozpoczecia_kierunku == student.rok_rozpoczecia_kierunku_studiow and random.random() <= VOLUNTARY_JOIN_COURSE_PROB:
+            # if course.rok_rozpoczecia_kierunku == student.rok_rozpoczecia_kierunku_studiow and random.random() <= VOLUNTARY_JOIN_COURSE_PROB:
+            if random.random() <= VOLUNTARY_JOIN_COURSE_PROB:
                 student_in_csv = [s for s in students if student.id == s.id]
 
                 if len(student_in_csv) == 0:

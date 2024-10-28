@@ -1,3 +1,6 @@
+DROP DATABASE DataWarehouse;
+USE DataWarehouse;
+
 CREATE TABLE Katedry (
     nazwa VARCHAR(100) PRIMARY KEY
 );

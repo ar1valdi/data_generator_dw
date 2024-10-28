@@ -1,7 +1,8 @@
 import os
 import threading
 from generator.batch_generator import generate_batch
-from generator.generation_config import T1_DATES, T2_DATES
+from generator.generation_config import T1_DATES, T2_DATES, T1_THREADS, T2_THREADS
+
 
 def go():
     # create results directory if it doesn't exist
@@ -16,7 +17,7 @@ def go():
 
     # define thread num
     threads = []
-    threads_num = 5
+    threads_num = T1_THREADS
 
     # run generation
     for i in range(threads_num):
@@ -28,6 +29,8 @@ def go():
     for thread in threads:
         thread.join()
 
+    threads_num = T2_THREADS
+
     # run generation
     for i in range(threads_num):
         thread = threading.Thread(target=generate_batch, args=(T2_DATES, "T2", "T1"))
@@ -37,6 +40,7 @@ def go():
     # wait for all threads to finish
     for thread in threads:
         thread.join()
+
 
 go()
 print("Complete")

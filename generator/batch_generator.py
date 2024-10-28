@@ -9,7 +9,6 @@ def generate_batch(date_range, file_prefix, prev_prefix):
     workers = []
     workers_sql = []
     faculties = []
-    participations = []
 
     # FACULTIES
     for i in range(FACULTIES_NUM):
@@ -57,8 +56,10 @@ def generate_batch(date_range, file_prefix, prev_prefix):
         write_to_sql(participations, "UdzialyWKursach", file_prefix)
 
     else:
-        courses = get_all_saved_courses(f"{prev_prefix}_Kursy")
-        students, students_sql = get_all_saved_students(f"{prev_prefix}_Studenci")
+        # courses.extend(get_all_saved_courses(f"{prev_prefix}_Kursy"))
+        students_2, students_sql_2 = get_all_saved_students(f"{prev_prefix}_Studenci")
+        students.extend(students_2)
+        students_sql.extend(students_sql_2)
 
         participations = generate_all_participations(courses, students_sql, students)
         write_to_sql(participations, "UdzialyWKursach", file_prefix)
@@ -67,6 +68,5 @@ def generate_batch(date_range, file_prefix, prev_prefix):
         s = generate_dropout(f"{prev_prefix}_Studenci", date_range)
         if s is None:
             return
-        print(s.id)
         write_to_csv([s], "Studenci", file_prefix)
 

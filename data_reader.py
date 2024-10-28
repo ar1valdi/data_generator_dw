@@ -94,9 +94,14 @@ def get_all_saved_students(filename):
             reader = sqlfile.readlines()[1:]
             for row in reader:
                 fields = row.split(" , ")
+                id = int(fields[0][1:])
+                imie = fields[1]
+                imie2 = fields[2]
+                nazwisko = fields[3]
+                data_urodzenia = __parse_date(fields[4][1:-1])
                 study_name = fields[5]
                 study_year = fields[6].strip()[:-2]
-                student_sql = models.sql_models.StudentSQL.from_StudentCSV(student_csv)
+                student_sql = models.sql_models.StudentSQL(id, imie, imie2, nazwisko, data_urodzenia, study_name, study_year)
                 student_sql.nazwa_kierunku_studiow = study_name
                 student_sql.rok_rozpoczecia_kierunku_studiow = int(study_year)
                 students_sql.append(student_sql)
