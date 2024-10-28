@@ -394,7 +394,7 @@ def generate_faculty_name(lexicon):
 
 def generate_course_base(num, workers):
     course_base = []
-    course_name_set = generate_name_set(CourseLexicon(), num)
+    course_name_set = generate_name_set(CourseLexicon(), num, generate_course_name)
     for course_name in course_name_set:
         hours = random.randrange(10, 121, 5)
         ects = random.randint(1, 8)
@@ -413,7 +413,7 @@ def generate_course_base(num, workers):
 
 
 def generate_all_studies_with_courses(lexicon, num, year_from, year_to, workers, date_bounds):
-    study_name_set = generate_name_set(lexicon, num)
+    study_name_set = generate_name_set(lexicon, num, generate_study_name)
     studies = []
     courses = []
 
@@ -442,21 +442,21 @@ def generate_all_studies_with_courses(lexicon, num, year_from, year_to, workers,
     return studies, courses
 
 
-def generate_name_set(lexicon, num, must_be_unique=False):
+def generate_name_set(lexicon, num, generation_method, must_be_unique=False):
     name_set = set()
     while len(name_set) < num:
 
         tries = 0
         if must_be_unique:
             while True:
-                gen_name = generate_faculty_name(lexicon)
+                gen_name = generation_method(lexicon)
                 tries += 1
                 if is_faculty_name_unique(gen_name):
                     break
                 if tries > 100:
                     raise Exception("Couldn't create unique name 100 times")
         else:
-            gen_name = generate_faculty_name(lexicon)
+            gen_name = generation_method(lexicon)
 
         name_set.add(gen_name)
 
