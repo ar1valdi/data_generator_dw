@@ -129,7 +129,8 @@ def get_all_saved_courses(filename):
                     data_utworzenia=__parse_date(row["data_utworzenia"]),
                     id_prowadzacego=int(row["id_prowadzacego"]),
                     nazwa_przypisanego_kierunku=row["nazwa_przypisanego_kierunku"],
-                    rok_rozpoczecia_kierunku=int(row["rok_przypisanego_kierunku"])
+                    rok_rozpoczecia_kierunku=int(row["rok_przypisanego_kierunku"]),
+                    kod=row["kod"]
                 )
                 courses.append(course)
 

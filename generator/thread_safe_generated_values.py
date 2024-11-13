@@ -6,6 +6,7 @@ __student_id = 0
 __faculty_names = set()
 __study_names = set()
 __contract_numbers = set()
+__course_codes = set()
 __pesel_numbers = set()
 __student_dropped_out = False
 
@@ -15,6 +16,7 @@ __student_id_lock = threading.Lock()
 __faculty_check_lock = threading.Lock()
 __study_check_lock = threading.Lock()
 __contract_check_lock = threading.Lock()
+__course_codes_lock = threading.Lock()
 __drop_out_lock = threading.Lock()
 __pesel_check_lock = threading.Lock()
 
@@ -25,6 +27,15 @@ def is_contract_number_unique(number):
         if number in __contract_numbers:
             return False
         __contract_numbers.add(number)
+        return True
+
+
+def is_course_code_unique(code):
+    global __course_codes
+    with __course_codes_lock:
+        if code in __course_codes:
+            return False
+        __course_codes.add(code)
         return True
 
 

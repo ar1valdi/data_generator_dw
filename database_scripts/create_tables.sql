@@ -28,6 +28,7 @@ CREATE TABLE Kursy (
     id_prowadzacego BIGINT NOT NULL,
     nazwa_przypisanego_kierunku VARCHAR(150) NOT NULL,
     rok_rozpoczecia_kierunku SMALLINT NOT NULL,
+    kod VARCHAR(8),
     FOREIGN KEY (id_prowadzacego) REFERENCES Pracownicy(id),
     FOREIGN KEY (nazwa_przypisanego_kierunku, rok_rozpoczecia_kierunku) REFERENCES Kierunki(nazwa, rok_rozpoczecia)
 );

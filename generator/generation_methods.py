@@ -7,7 +7,7 @@ from datetime import timedelta, datetime
 
 from data_export_import import get_all_saved_students
 from generator.thread_safe_generated_values import get_course_id, is_faculty_name_unique, is_contract_number_unique, \
-    get_student_id, drop_out_used, is_pesel_unique
+    get_student_id, drop_out_used, is_pesel_unique, is_course_code_unique
 from models import csv_models, sql_models
 from generator.generation_config import *
 
@@ -433,6 +433,7 @@ def generate_course_base(num, workers):
             None,
             worker,
             None,
+            None,
             None
         ))
     return course_base
@@ -463,9 +464,19 @@ def generate_all_studies_with_courses(num, year_from, year_to, workers, date_bou
                 )
                 course.nazwa_przypisanego_kierunku = study.nazwa
                 course.rok_rozpoczecia_kierunku = study.rok_rozpoczecia
+                course.kod = generate_course_code()
                 courses.append(course)
 
     return studies, courses
+
+
+def generate_course_code():
+    for i in range(100):
+        code = ''.join(random.choices(string.ascii_uppercase, k=8))
+        if is_course_code_unique(code):
+            return code
+
+    raise Exception("Couldn't create unique course code 100 times")
 
 
 def generate_name_set(lexicon, num, generation_method, must_be_unique=True):

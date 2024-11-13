@@ -19,7 +19,7 @@ class PracownikSQL:
 
 
 class Kurs:
-    def __init__(self, nazwa, ilosc_godzin, liczba_ects, id, data_utworzenia, id_prowadzacego, nazwa_przypisanego_kierunku, rok_rozpoczecia_kierunku):
+    def __init__(self, nazwa, ilosc_godzin, liczba_ects, id, data_utworzenia, id_prowadzacego, nazwa_przypisanego_kierunku, rok_rozpoczecia_kierunku, kod):
         self.id = id
         self.nazwa = nazwa
         self.ilosc_godzin = ilosc_godzin
@@ -28,6 +28,7 @@ class Kurs:
         self.id_prowadzacego = id_prowadzacego
         self.nazwa_przypisanego_kierunku = nazwa_przypisanego_kierunku
         self.rok_rozpoczecia_kierunku = rok_rozpoczecia_kierunku
+        self.kod = kod
 
 
 class Kierunek:
