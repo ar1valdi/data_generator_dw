@@ -6,6 +6,7 @@ __student_id = 0
 __faculty_names = set()
 __study_names = set()
 __contract_numbers = set()
+__pesel_numbers = set()
 __student_dropped_out = False
 
 __course_id_lock = threading.Lock()
@@ -15,6 +16,7 @@ __faculty_check_lock = threading.Lock()
 __study_check_lock = threading.Lock()
 __contract_check_lock = threading.Lock()
 __drop_out_lock = threading.Lock()
+__pesel_check_lock = threading.Lock()
 
 
 def is_contract_number_unique(number):
@@ -64,6 +66,15 @@ def drop_out_used():
         to_ret = __student_dropped_out
         __student_dropped_out = True
         return to_ret
+
+
+def is_pesel_unique(pesel):
+    global __pesel_check_lock
+    with __pesel_check_lock:
+        if pesel in __pesel_numbers:
+            return False
+        __pesel_numbers.add(pesel)
+        return True
 
 
 def get_student_id():

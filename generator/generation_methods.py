@@ -3,11 +3,11 @@ from copy import deepcopy
 from enum import Enum
 import random
 from faker import Faker
-from datetime import timedelta
+from datetime import timedelta, datetime
 
-from data_reader import get_all_saved_students
+from data_export_import import get_all_saved_students
 from generator.thread_safe_generated_values import get_course_id, is_faculty_name_unique, is_contract_number_unique, \
-    get_student_id, drop_out_used
+    get_student_id, drop_out_used, is_pesel_unique
 from models import csv_models, sql_models
 from generator.generation_config import *
 
@@ -191,8 +191,8 @@ class GrammaticalGender(Enum):
 
 
 class Sex(Enum):
-    MALE = 1
-    FEMALE = 2
+    MALE = True
+    FEMALE = False
 
 
 def generate_names_and_surname(sex: Sex):
@@ -270,15 +270,30 @@ def generate_study_start_end_dates(title: str, birthdate: date, date_bounds):
     return start_date, end_date
 
 
+def get_stopien_studiow(title) -> str:
+    key = get_studies_key(title)
+
+    if key == "BACHELORS":
+        return "Pierwszy"
+    elif key == "MASTERS":
+        return "Drugi"
+    else:
+        return "Trzeci"
+
+
 def generate_student(date_range):
     fake = Faker("pl_PL")
 
-    name1, name2, surname = generate_names_and_surname(random.choice([True, False]))
+    sex = random.choice([True, False])
+    name1, name2, surname = generate_names_and_surname(sex)
     title = generate_scientific_title(for_student=True)
+    stopien_studiow = get_stopien_studiow(title)
     min_birth, max_birth = generate_min_max_birth_date_student(title, date_range)
     birth = fake.date_between(start_date=min_birth, end_date=max_birth)
     study_start, study_end = generate_study_start_end_dates(title, birth, date_range)
-    return csv_models.StudentCSV(None, name1, name2, surname, title, birth, study_start, study_end)
+    pesel = get_unique_pesel(fake, datetime.combine(birth, datetime.min.time()), 'M' if sex else 'F')
+    return csv_models.StudentCSV(None, name1, name2, surname, title, birth, study_start,
+                                 study_end, stopien_studiow, pesel)
 
 
 def generate_employment_start_end_dates(birthdate, date_bounds):
@@ -320,12 +335,23 @@ def generate_contract_number():
 def generate_worker(dates_range):
     fake = Faker("pl_PL")
 
-    name1, name2, surname = generate_names_and_surname(random.choice([True, False]))
+    sex = random.choice([True, False])
+    name1, name2, surname = generate_names_and_surname(sex)
     title = generate_scientific_title(for_student=False)
     birth = fake.date_of_birth(minimum_age=MIN_WORKER_AGE, maximum_age=MAX_WORKER_AGE)
     empl_start, empl_end = generate_employment_start_end_dates(birth, dates_range)
+    pesel = get_unique_pesel(fake, datetime.combine(birth, datetime.min.time()), 'M' if sex else 'F')
     contract_number = generate_contract_number()
-    return csv_models.PracownikCSV(None, name1, name2, surname, title, birth, empl_start, empl_end, contract_number)
+    return csv_models.PracownikCSV(None, name1, name2, surname, title, birth, empl_start, empl_end, contract_number, pesel)
+
+
+def get_unique_pesel(fake, birth, sex):
+    for i in range(100):
+        pesel = fake.pesel(birth, sex)
+        if is_pesel_unique(pesel):
+            return pesel
+
+    raise Exception("Couldn't create unique contract number 100 times")
 
 
 def generate_course_name(lexicon):
@@ -435,7 +461,7 @@ def generate_all_studies_with_courses(num, year_from, year_to, workers, date_bou
                     random.choice([2, 10]),
                     1
                 )
-                course.nazwa_kierunku = study.nazwa
+                course.nazwa_przypisanego_kierunku = study.nazwa
                 course.rok_rozpoczecia_kierunku = study.rok_rozpoczecia
                 courses.append(course)
 
@@ -476,19 +502,47 @@ def generate_faculty(lexicon):
     return sql_models.Katedra(name)
 
 
+def get_next_stopien_studiow(stopien):
+    if stopien == "Pierwszy":
+        return "Drugi"
+    elif stopien == "Drugi":
+        return "Trzeci"
+    return None
+
+
+def get_next_title(title):
+    if title is None:
+        return "Inżynier"
+    elif title == "Inżynier":
+        return "Magister Inżynier"
+    elif title == "Licencjat":
+        return "Magister"
+    elif title in ["Magister", "Magister Inżynier"]:
+        return "Doktor"
+    elif title == "Doktor":
+        return "Doktor Habilitowany"
+    else:
+        return "Profesor"
+
+
 def generate_dropout(last_students_csv, date_bounds):
     if drop_out_used():
         return
     s_csv, s_sql = get_all_saved_students(last_students_csv)
     active_s = None
+
     for s in s_csv:
         if s.data_zakonczenia_studiow is None:
             active_s = s
             break
     if active_s is None:
         return None
+
     active_s.data_zakonczenia_studiow = date_bounds["end"] - timedelta(days=31)
+    active_s.stopien_studiow = get_next_stopien_studiow(active_s.stopien_studiow)
+    active_s.tytul_naukowy = get_next_title(active_s.tytul_naukowy)
     active_s.id = get_student_id()
+    print(active_s.id)
     return active_s
 
 
@@ -506,11 +560,10 @@ def generate_all_participations(courses, students_sql, students):
     participations = []
     for course in courses:
         for student in students_sql:
-            if course.nazwa_kierunku == student.nazwa_kierunku_studiow and course.rok_rozpoczecia_kierunku == student.rok_rozpoczecia_kierunku_studiow:
+            if course.nazwa_przypisanego_kierunku == student.nazwa_kierunku_studiow and course.rok_rozpoczecia_kierunku == student.rok_rozpoczecia_kierunku_studiow:
                 participations.append(generate_participation(course, student))
                 continue
 
-            # if course.rok_rozpoczecia_kierunku == student.rok_rozpoczecia_kierunku_studiow and random.random() <= VOLUNTARY_JOIN_COURSE_PROB:
             if random.random() <= VOLUNTARY_JOIN_COURSE_PROB:
                 student_in_csv = [s for s in students if student.id == s.id]
 

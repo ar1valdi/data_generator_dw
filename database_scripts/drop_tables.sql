@@ -1,6 +1,6 @@
-DROP TABLE dbo.UdzialyWKursach;
-DROP TABLE dbo.Studenci;
-DROP TABLE dbo.Kursy;
-DROP TABLE dbo.Kierunki;
-DROP TABLE dbo.Pracownicy;
-DROP TABLE dbo.Katedry;
+DROP TABLE IF EXISTS dbo.UdzialyWKursach;
+DROP TABLE IF EXISTS dbo.Studenci;
+DROP TABLE IF EXISTS dbo.Kursy;
+DROP TABLE IF EXISTS dbo.Kierunki;
+DROP TABLE IF EXISTS dbo.Pracownicy;
+DROP TABLE IF EXISTS dbo.Katedry;

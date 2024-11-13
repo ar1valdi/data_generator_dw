@@ -1,6 +1,3 @@
-DROP DATABASE DataWarehouse;
-USE DataWarehouse;
-
 CREATE TABLE Katedry (
     nazwa VARCHAR(100) PRIMARY KEY
 );
@@ -12,7 +9,8 @@ CREATE TABLE Pracownicy (
     nazwisko VARCHAR(50) NOT NULL,
     tytul_naukowy VARCHAR(50),
     nazwa_katedry VARCHAR(100) NOT NULL,
-    FOREIGN KEY (nazwa_katedry) REFERENCES Katedry(nazwa)
+    FOREIGN KEY (nazwa_katedry) REFERENCES Katedry(nazwa),
+    pesel VARCHAR(11) NOT NULL
 );
 
 CREATE TABLE Kierunki (
@@ -28,10 +26,10 @@ CREATE TABLE Kursy (
     liczba_ects SMALLINT NOT NULL,
     data_utworzenia DATE NOT NULL,
     id_prowadzacego BIGINT NOT NULL,
-    nazwa_kierunku VARCHAR(150) NOT NULL,
+    nazwa_przypisanego_kierunku VARCHAR(150) NOT NULL,
     rok_rozpoczecia_kierunku SMALLINT NOT NULL,
     FOREIGN KEY (id_prowadzacego) REFERENCES Pracownicy(id),
-    FOREIGN KEY (nazwa_kierunku, rok_rozpoczecia_kierunku) REFERENCES Kierunki(nazwa, rok_rozpoczecia)
+    FOREIGN KEY (nazwa_przypisanego_kierunku, rok_rozpoczecia_kierunku) REFERENCES Kierunki(nazwa, rok_rozpoczecia)
 );
 
 CREATE TABLE Studenci (
@@ -42,7 +40,8 @@ CREATE TABLE Studenci (
     data_urodzenia DATE NOT NULL,
     nazwa_kierunku_studiow VARCHAR(150) NOT NULL,
     rok_rozpoczecia_kierunku_studiow SMALLINT NOT NULL,
-    FOREIGN KEY (nazwa_kierunku_studiow, rok_rozpoczecia_kierunku_studiow) REFERENCES Kierunki(nazwa, rok_rozpoczecia)
+    FOREIGN KEY (nazwa_kierunku_studiow, rok_rozpoczecia_kierunku_studiow) REFERENCES Kierunki(nazwa, rok_rozpoczecia),
+    pesel VARCHAR(11) NOT NULL
 );
 
 CREATE TABLE UdzialyWKursach (
