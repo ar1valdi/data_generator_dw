@@ -1,8 +1,9 @@
 import os
 import threading
-from data_export_import import recreate_bulk_load_file, generate_full_db_script
+from data_export_import import recreate_bulk_load_file, generate_full_db_script, write_to_csv
 from generator.batch_generator import generate_batch
 from generator.generation_config import T1_DATES, T2_DATES, T1_THREADS, T2_THREADS
+from generator.generation_methods import generate_full_date_range_for_dw
 
 
 def go():
@@ -49,6 +50,9 @@ def go():
                             "database_scripts/create_tables.sql",
                             "results/aa_bulk_inserts.sql",
                             "results/aa_full_db_recreation.sql")
+
+    dates = generate_full_date_range_for_dw(T1_DATES["start"].year, T2_DATES["end"].year)
+    write_to_csv(dates, "ab_dates")
 
 
 go()

@@ -12,8 +12,9 @@ prev_student_lock = threading.Lock()
 prev_course_lock = threading.Lock()
 
 
-def write_to_csv(array, filename, prefix):
-    filename = f"results/{prefix}_{filename}.csv"
+def write_to_csv(array, filename, prefix=None):
+    prefix_safe = f"{prefix}_" if prefix is not None else ""
+    filename = f"results/{prefix_safe}{filename}.csv"
     fieldnames = array[0].__dict__.keys()
 
     with csv_lock:
@@ -92,7 +93,8 @@ def get_all_saved_students(filename):
                     data_rozpoczecia_studiow=__parse_date(row["data_rozpoczecia_studiow"]),
                     data_zakonczenia_studiow=__parse_date(row["data_zakonczenia_studiow"]),
                     stopien_studiow=row["stopien_studiow"],
-                    pesel=row["pesel"]
+                    pesel=row["pesel"],
+                    data_dodania_rekordu=row["data_dodania_rekordu"]
                 )
                 students_csv.append(student_csv)
 

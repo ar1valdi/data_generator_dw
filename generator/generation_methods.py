@@ -5,6 +5,7 @@ import random
 from faker import Faker
 from datetime import timedelta, datetime
 
+import models.csv_models
 from data_export_import import get_all_saved_students
 from generator.thread_safe_generated_values import get_course_id, is_faculty_name_unique, is_contract_number_unique, \
     get_student_id, drop_out_used, is_pesel_unique, is_course_code_unique
@@ -292,8 +293,9 @@ def generate_student(date_range):
     birth = fake.date_between(start_date=min_birth, end_date=max_birth)
     study_start, study_end = generate_study_start_end_dates(title, birth, date_range)
     pesel = get_unique_pesel(fake, datetime.combine(birth, datetime.min.time()), 'M' if sex else 'F')
+    add_date = fake.date_between(start_date=study_start - timedelta(days=31), end_date=study_start)
     return csv_models.StudentCSV(None, name1, name2, surname, title, birth, study_start,
-                                 study_end, stopien_studiow, pesel)
+                                 study_end, stopien_studiow, pesel, add_date)
 
 
 def generate_employment_start_end_dates(birthdate, date_bounds):
@@ -342,7 +344,9 @@ def generate_worker(dates_range):
     empl_start, empl_end = generate_employment_start_end_dates(birth, dates_range)
     pesel = get_unique_pesel(fake, datetime.combine(birth, datetime.min.time()), 'M' if sex else 'F')
     contract_number = generate_contract_number()
-    return csv_models.PracownikCSV(None, name1, name2, surname, title, birth, empl_start, empl_end, contract_number, pesel)
+    add_date = fake.date_between(start_date=empl_start - timedelta(days=7), end_date=empl_start)
+    return csv_models.PracownikCSV(None, name1, name2, surname, title, birth, empl_start,
+                                   empl_end, contract_number, pesel, add_date)
 
 
 def get_unique_pesel(fake, birth, sex):
@@ -586,3 +590,41 @@ def generate_all_participations(courses, students_sql, students):
                         participations.append(generate_participation(course, student))
 
     return participations
+
+
+def generate_full_date_range_for_dw(start_year: int, end_year: int):
+    month_dict = [
+        ["styczeń", 31],
+        ["luty", 28],
+        ["marzec", 31],
+        ["kwiecień", 30],
+        ["maj", 31],
+        ["czerwiec", 30],
+        ["lipiec", 31],
+        ["sierpień", 31],
+        ["wrzesień", 30],
+        ["październik", 31],
+        ["listopad", 30],
+        ["grudzień", 31],
+    ]
+
+    # insert dummy row
+    id = 2
+    result_dates: [models.csv_models.Data] = [
+        models.csv_models.Data(1, 1, 1, 1, 1)
+    ]
+
+    for year in range(start_year, end_year):
+        for month_num in range(1, 13):
+            for day_num in range(1, month_dict[month_num-1][1] + 1):
+                new_date = models.csv_models.Data(
+                    id,
+                    day_num,
+                    month_dict[month_num-1][0],
+                    month_num,
+                    year
+                )
+                result_dates.append(new_date)
+                id += 1
+
+    return result_dates
